@@ -70,29 +70,39 @@ auth:
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
+  defaultAuthor:
+    name: Shipyard IDP
+    email: scaffolder@shipyard.dev
+  defaultCommitMessage: "feat: initial service scaffold by Shipyard IDP"
 
 catalog:
   import:
     entityFilename: catalog-info.yaml
     pullRequestBranchName: backstage-integration
   rules:
-    - allow: [Component, System, API, Resource, Location]
+    - allow: [Component, System, API, Resource, Location, Template]
   locations:
     # Local example data, file locations are relative to the backend process, typically `packages/backend`
     - type: file
       target: ../../examples/entities.yaml
 
     # Local example template
-    - type: file
-      target: ../../examples/template/template.yaml
-      rules:
-        - allow: [Template]
+    # - type: file
+    #   target: ../../examples/template/template.yaml
+    #   rules:
+    #     - allow: [Template]
 
     # Local example organizational data
     - type: file
       target: ../../examples/org.yaml
       rules:
         - allow: [User, Group]
+
+    # Custom template for creating microservices, with CI/CD and optional RDS database
+    - type: file
+      target: ../../examples/templates/service-template.yaml
+      rules:
+        - allow: [Template]
 
     ## Uncomment these lines to add more example data
     # - type: url
