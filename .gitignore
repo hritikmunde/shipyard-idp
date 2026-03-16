@@ -21,3 +21,4 @@ terraform/*.tfstate
 terraform/*.tfstate.backup
 terraform/.terraform.lock.hcl
 terraform/terraform.tfvars
+# k8s/backstage/secret.yaml
