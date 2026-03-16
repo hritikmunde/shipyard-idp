@@ -1,41 +1,64 @@
 #!/bin/bash
 set -e
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+clear
 echo ""
-echo "╔═══════════════════════════════════════╗"
-echo "║       Shipyard IDP Teardown           ║"
-echo "╚═══════════════════════════════════════╝"
+echo -e "  ${RED}${BOLD}⚓  Shipyard IDP — Teardown${NC}"
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-echo "What do you want to tear down?"
+echo -e "  What do you want to destroy?"
 echo ""
-echo "  1. Local (Kind cluster)"
-echo "  2. Cloud (AWS EKS via Terraform)"
+echo -e "  ${GREEN}1${NC}  Local  ${CYAN}(Kind cluster)${NC}"
+echo -e "  ${YELLOW}2${NC}  Cloud  ${CYAN}(AWS EKS via Terraform)${NC}"
 echo ""
-read -p "Enter choice [1 or 2]: " TARGET
+read -p "  Enter choice [1 or 2]: " TARGET
+echo ""
 
 if [ "$TARGET" = "1" ]; then
-  echo ""
-  echo "🗑️  Deleting Kind cluster..."
+  echo -e "  ${CYAN}→${NC}  Stopping port-forwards..."
+  pkill -f "kubectl port-forward" 2>/dev/null || true
+
+  echo -e "  ${CYAN}→${NC}  Deleting Kind cluster..."
   kind delete cluster --name shipyard
-  echo "✅ Local cluster deleted"
+
+  echo ""
+  echo -e "  ${GREEN}✓${NC}  Local cluster deleted"
+  echo -e "  ${CYAN}→${NC}  All data removed. No costs incurred."
+  echo ""
 fi
 
 if [ "$TARGET" = "2" ]; then
+  echo -e "  ${RED}${BOLD}⚠️   WARNING${NC}"
+  echo -e "  This destroys ALL AWS infrastructure:"
+  echo -e "  VPC, EKS cluster, RDS instances, ECR — everything."
+  echo -e "  Billing stops immediately after completion."
   echo ""
-  echo "⚠️  This will destroy ALL AWS infrastructure."
-  echo "   VPC, EKS cluster, RDS instances, everything."
+  read -p "  Type 'destroy' to confirm: " CONFIRM
   echo ""
-  read -p "Are you sure? Type 'destroy' to confirm: " CONFIRM
 
   if [ "$CONFIRM" != "destroy" ]; then
-    echo "Aborted."
+    echo -e "  ${CYAN}→${NC}  Aborted. Nothing was deleted."
     exit 0
   fi
 
+  echo -e "  ${CYAN}→${NC}  Stopping port-forwards..."
+  pkill -f "kubectl port-forward" 2>/dev/null || true
+
+  echo -e "  ${CYAN}→${NC}  Running terraform destroy..."
+  echo -e "  ${YELLOW}!${NC}   This takes 10-15 minutes..."
   echo ""
-  echo "🗑️  Running terraform destroy..."
   cd terraform
   terraform destroy -auto-approve
+
   echo ""
-  echo "✅ All AWS resources destroyed. Billing stopped."
+  echo -e "  ${GREEN}✓${NC}  All AWS resources destroyed"
+  echo -e "  ${GREEN}✓${NC}  Billing stopped"
+  echo ""
 fi
