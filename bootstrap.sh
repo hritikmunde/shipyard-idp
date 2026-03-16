@@ -192,20 +192,29 @@ if [ "$DEPLOY_TARGET" = "1" ]; then
   ok "AWS providers healthy"
 
   # ─── AWS credentials ────────────────────────────────
-  step "Connecting AWS credentials to Crossplane"
+  # AWS credentials for Crossplane
   echo ""
-  warn "Crossplane needs AWS credentials to provision RDS databases."
-  warn "These are stored as a Kubernetes secret — not committed to Git."
-  echo ""
-  read -p "  AWS Access Key ID: " AWS_KEY
-  read -sp "  AWS Secret Access Key: " AWS_SECRET
-  echo ""
+  info "Reading AWS credentials from AWS CLI config..."
+
+  AWS_KEY=$(aws configure get aws_access_key_id 2>/dev/null || echo "")
+  AWS_SECRET=$(aws configure get aws_secret_access_key 2>/dev/null || echo "")
+
+  if [ -z "$AWS_KEY" ] || [ -z "$AWS_SECRET" ]; then
+    warn "AWS CLI credentials not found."
+    warn "Either run 'aws configure' first, or enter manually:"
+    echo ""
+    read -p "  AWS Access Key ID: " AWS_KEY
+    read -sp "  AWS Secret Access Key: " AWS_SECRET
+    echo ""
+  else
+    ok "AWS credentials found in CLI config"
+  fi
 
   cat > /tmp/aws-creds.txt <<CREDS
-[default]
-aws_access_key_id=${AWS_KEY}
-aws_secret_access_key=${AWS_SECRET}
-CREDS
+  [default]
+  aws_access_key_id=${AWS_KEY}
+  aws_secret_access_key=${AWS_SECRET}
+  CREDS
 
   kubectl create secret generic aws-secret \
     -n crossplane-system \

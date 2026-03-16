@@ -13,11 +13,9 @@ echo -e "${CYAN}${BOLD}  ⚓  Shipyard IDP — Starting Platform${NC}"
 echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-# Kill existing port-forwards
 pkill -f "kubectl port-forward" 2>/dev/null || true
-sleep 1
+sleep 2
 
-# Check cluster is running
 if ! kubectl get nodes &>/dev/null; then
   echo -e "  ${RED}✗${NC}  Cluster not running."
   echo -e "  ${CYAN}→${NC}  Run ./bootstrap.sh first"
@@ -28,14 +26,19 @@ echo -e "  ${CYAN}→${NC}  Starting port-forwards..."
 
 kubectl port-forward svc/backstage \
   -n backstage 3000:80 &>/dev/null &
+sleep 1
+
 kubectl port-forward svc/backstage \
   -n backstage 7007:80 &>/dev/null &
+sleep 1
+
 kubectl port-forward svc/argocd-server \
   -n argocd 8080:443 &>/dev/null &
+sleep 1
+
 kubectl port-forward svc/monitoring-grafana \
   -n monitoring 3001:80 &>/dev/null &
-
-sleep 3
+sleep 2
 
 ARGOCD_PASSWORD=$(kubectl -n argocd get secret \
   argocd-initial-admin-secret \
