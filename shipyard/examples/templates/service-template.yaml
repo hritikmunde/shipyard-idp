@@ -80,8 +80,8 @@ spec:
       name: Create GitHub Repository
       action: publish:github
       input:
-        description: \${{ parameters.description }}
-        repoUrl: \${{ parameters.repoUrl }}
+        description: ${{ parameters.description }}
+        repoUrl: ${{ parameters.repoUrl }}
         defaultBranch: 'master'
         repoVisibility: public
     

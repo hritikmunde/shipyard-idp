@@ -1,6 +1,6 @@
 app:
   # Should be the same as backend.baseUrl when using the `app-backend` plugin.
-  baseUrl: http://localhost:7007
+  baseUrl: ${APP_BASE_URL}
 
 backend:
   # Note that the baseUrl should be the URL that the browser and other clients
@@ -8,48 +8,64 @@ backend:
   # reachable not just from within the backend host, but from all of your
   # callers. When its value is "http://localhost:7007", it's strictly private
   # and can't be reached by others.
-  baseUrl: http://localhost:7007
+  baseUrl: ${BACKEND_BASE_URL}
   # The listener can also be expressed as a single <host>:<port> string. In this case we bind to
   # all interfaces, the most permissive setting. The right value depends on your specific deployment.
   listen: ':7007'
+  cors:
+    origin: ${APP_BASE_URL}
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  # This is for local development only, it is not recommended to use this in production
+  # The production database configuration is stored in app-config.production.yaml
 
   # config options: https://node-postgres.com/apis/client
   database:
     client: pg
     connection:
       host: ${POSTGRES_HOST}
-      port: ${POSTGRES_PORT}
+      port: ${POSTGRES_PORT:-5432}
       user: ${POSTGRES_USER}
       password: ${POSTGRES_PASSWORD}
+      database: backstage_plugin_catalog
       # https://node-postgres.com/features/ssl
       # you can set the sslmode configuration option via the `PGSSLMODE` environment variable
       # see https://www.postgresql.org/docs/current/libpq-ssl.html Table 33.1. SSL Mode Descriptions (e.g. require)
       # ssl:
       #   ca: # if you have a CA file and want to verify it you can uncomment this section
       #     $file: <file-path>/ca/server.crt
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
 
 auth:
+  environment: production
   providers:
-    guest: {}
+    guest:
+      dangerouslyAllowOutsideDevelopment: true
 
 catalog:
   # Overrides the default list locations from app-config.yaml as these contain example data.
   # See https://backstage.io/docs/features/software-catalog/#adding-components-to-the-catalog for more details
   # on how to get entities into the catalog.
+  import:
+    # The `rules` section is used to control which kinds of entities are allowed to be imported from each location. In this example, we allow all the common entity kinds, but you can customize this as needed.
+    # The `allow` rule is a simple way to specify which entity kinds are permitted.
+    # For more complex scenarios, you can use `match` rules to allow or deny entities based on their properties, such as labels or annotations. See the documentation for more details: https://
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    # This is a catch-all rule that allows all the common entity kinds. You can customize this to be more restrictive if needed.
+    - allow: [Component, System, API, Resource, Location, Template, User, Group]
   locations:
     # Local example data, replace this with your production config, these are intended for demo use only.
     # File locations are relative to the backend process, typically in a deployed context, such as in a Docker container, this will be the root
-    - type: file
-      target: ./examples/entities.yaml
-
-    # Local example template
-    - type: file
-      target: ./examples/template/template.yaml
-      rules:
-        - allow: [Template]
-
-    # Local example organizational data
-    - type: file
-      target: ./examples/org.yaml
+    - type: url
+      target: https://github.com/hritikmunde/shipyard-idp/blob/master/shipyard/examples/org.yaml
       rules:
         - allow: [User, Group]
+    - type: url
+      target: https://github.com/hritikmunde/shipyard-idp/blob/master/shipyard/examples/templates/service-template.yaml
+      rules:
+        - allow: [Template]
