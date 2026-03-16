@@ -1,4 +1,3 @@
-cat > ~/Documents/DevOps/IDP/shipyard-idp/README.md <<'EOF'
 # Shipyard IDP
 
 > Self-service Internal Developer Platform — provision GitHub repos, CI/CD pipelines, and cloud databases in under 3 minutes.
@@ -264,5 +263,3 @@ Things you'd add before running this in production:
 ## License
 
 MIT
-
-EOF
