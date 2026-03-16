@@ -41,30 +41,8 @@ No tickets. No waiting. No platform team bottleneck.
 ---
 
 ## Architecture
-```
-Developer
-    │
-    ▼
-┌─────────────────────────────────────────────────────┐
-│                   Backstage (IDP Portal)             │
-│         Fill form → Click Create → Done              │
-└──────────────────────┬──────────────────────────────┘
-                       │
-         ┌─────────────┼─────────────┐
-         │             │             │
-         ▼             ▼             ▼
-   GitHub Repo    Crossplane     ArgoCD
-   + CI/CD        provisions     deploys to
-   created        RDS on AWS     Kubernetes
-                       │             │
-                       ▼             ▼
-                  AWS RDS DB    Service running
-                  provisioned   in K8s namespace
-                       │
-                       ▼
-              Prometheus + Grafana
-              monitoring everything
-```
+
+![Shipyard IDP Architecture](docs/architecture.svg)
 
 ---
 
